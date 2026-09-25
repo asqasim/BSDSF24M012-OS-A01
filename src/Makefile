@@ -1,22 +1,33 @@
 CC = gcc
 CFLAGS = -Wall -Iinclude
+AR = ar
+ARFLAGS = rcs
+
 OBJDIR = ../obj
 BINDIR = ../bin
+LIBDIR = ../lib
 INCDIR = ../include
 
-OBJECTS = $(OBJDIR)/mystrfunctions.o $(OBJDIR)/myfilefunctions.o $(OBJDIR)/main.o
+LIB_OBJECTS = $(OBJDIR)/mystrfunctions.o $(OBJDIR)/myfilefunctions.o
+MAIN_OBJECT = $(OBJDIR)/main.o
 
-TARGET = $(BINDIR)/client
+STATIC_LIB = $(LIBDIR)/libmyutils.a
+TARGET_STATIC = $(BINDIR)/client_static
 
-all: $(TARGET)
+all: $(TARGET_STATIC)
 
-$(TARGET): $(OBJECTS)
-	$(CC) $(OBJECTS) -o $(TARGET)
+# Build the static library archive from the module object files
+$(STATIC_LIB): $(LIB_OBJECTS)
+	$(AR) $(ARFLAGS) $(STATIC_LIB) $(LIB_OBJECTS)
+
+# Link main.o against the static library
+$(TARGET_STATIC): $(MAIN_OBJECT) $(STATIC_LIB)
+	$(CC) $(MAIN_OBJECT) -L$(LIBDIR) -lmyutils -o $(TARGET_STATIC)
 
 $(OBJDIR)/%.o: %.c
 	$(CC) $(CFLAGS) -I$(INCDIR) -c $< -o $@
 
 clean:
-	rm -f $(OBJDIR)/*.o $(TARGET)
+	rm -f $(OBJDIR)/*.o $(STATIC_LIB) $(TARGET_STATIC)
 
 .PHONY: all clean
