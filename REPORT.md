@@ -47,7 +47,7 @@ Yes, `mystrlen` and the other library functions appear in `nm`'s output for `cli
 
 Position-Independent Code is machine code that can execute correctly no matter where in memory it gets loaded. Normally, compiled code contains hard-coded memory addresses for its functions and global data. A shared library (`.so`), however, is loaded into a different process's address space at runtime, and that address can vary between programs or even between runs of the same program. If the library's code contained fixed addresses, it would break as soon as it wasn't loaded at the exact address it was compiled for.
 
-`-fPIC` solves this by making the compiler generate code that accesses functions and data through offsets and indirect tables (the GOT and PLT) instead of absolute addresses. This is why the Makefile compiles a separate set of `_pic.o` object files only for the `.so` build — the static library doesn't need this indirection since its code is copied directly into the final executable at a fixed, known location.
+`-fPIC` solves this by making the compiler generate code that accesses functions and data through offsets and indirect tables (the GOT and PLT) instead of absolute addresses. This is why the Makefile compiles a separate set of `_pic.o` object files only for the `.so` build, the static library doesn't need this indirection since its code is copied directly into the final executable at a fixed, known location.
 
 **Q: Explain the difference in file size between your static and dynamic clients. Why does this difference exist?**
 
@@ -62,10 +62,10 @@ Normally, a statically linked executable is larger because the library's compile
 
 ```
 $ nm bin/client_static | grep mystrlen
-000000000000159a T mystrlen      # defined — code is embedded
+000000000000159a T mystrlen      # defined, code is embedded
 
 $ nm bin/client_dynamic | grep mystrlen
-                 U mystrlen      # undefined — resolved at runtime
+                 U mystrlen      # undefined, resolved at runtime
 ```
 
 The reason the overall file sizes don't differ here is that `libmyutils` is a very small library — only a handful of simple string/file functions, amounting to a few hundred bytes of actual code. Both executables are still dynamically linked against `libc` and `ld-linux` regardless (confirmed via `ldd`), and that shared overhead — ELF headers, dynamic symbol tables, PLT/GOT stubs — dominates the file size at this scale. Because Linux also page-aligns sections (typically to 4KB boundaries), a difference of a few hundred bytes in the actual library code often doesn't even show up in the rounded file size. This size gap becomes significant only with much larger libraries (e.g. `libssl`, `libcurl`), where static linking would pull in hundreds of KB to MB of extra code.
