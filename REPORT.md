@@ -12,8 +12,8 @@ This differs from linking against a library (e.g. `-lmyutils`), where instead of
 
 A git tag is a fixed pointer to one specific commit. Unlike a branch, a tag never moves forward as new commits are added, which makes it useful for marking release points — for example, "this exact commit is version 0.1.1" — so that state can always be found again later.
 
-- A **lightweight (simple) tag** (`git tag v1.0`) is just a name pointing at a commit, with no extra metadata.
-- An **annotated tag** (`git tag -a`) is a full git object with its own message, author, and timestamp. Annotated tags are recommended for releases since they carry more information, and they're what GitHub Releases are built on top of.
+- A **simple tag** (`git tag v1.0`) is just a name pointing at a commit, with no extra metadata.
+- An **annotated tag** (`git tag -a`) is a full git object with its own message, author, and timestamp. Annotated tags carry more information, and they're what GitHub Releases are built on top of.
 
 ---
 
@@ -21,7 +21,7 @@ A git tag is a fixed pointer to one specific commit. Unlike a branch, a tag neve
 
 A GitHub Release wraps a tag with human-readable release notes, making it easy to identify and distribute a specific version of the project.
 
-Attaching compiled binaries (like `bin/client`) lets users download and run the program directly without needing to clone the repository and compile it themselves — useful for end users who just want the software, not the source code.
+Attaching compiled binaries (like `bin/client`) lets users download and run the program directly without needing to setup the environment such as cloning and having gcc installed. Its good if you wanted the software not the source code.
 
 ---
 
@@ -37,7 +37,7 @@ Part 2's rule linked all object files directly: `$(TARGET): $(OBJECTS)` followed
 
 **Q: When you run `nm` on `client_static`, are symbols like `mystrlen` present? What does this tell you?**
 
-Yes, `mystrlen` and the other library functions appear in `nm`'s output for `client_static`. This confirms that static linking physically copies the machine code for each used function directly into the final executable at link time — the executable is fully self-contained and does not depend on `libmyutils.a` being present at runtime.
+Yes, `mystrlen` and the other library functions appear in `nm`'s output for `client_static`. This confirms that static linking physically copies the machine code for each used function directly into the final executable at link time and the executable is fully self-contained and does not depend on `libmyutils.a` being present at runtime. I have pasted direct output containing the machine code in section 4.
 
 ---
 
@@ -45,7 +45,7 @@ Yes, `mystrlen` and the other library functions appear in `nm`'s output for `cli
 
 **Q: What is Position-Independent Code (-fPIC) and why is it a fundamental requirement for creating shared libraries?**
 
-Position-Independent Code is machine code that can execute correctly no matter where in memory it gets loaded. Normally, compiled code contains hard-coded memory addresses for its functions and global data. A shared library (`.so`), however, is loaded into a different process's address space at runtime, and that address can vary between programs or even between runs of the same program (especially with ASLR enabled). If the library's code contained fixed addresses, it would break as soon as it wasn't loaded at the exact address it was compiled for.
+Position-Independent Code is machine code that can execute correctly no matter where in memory it gets loaded. Normally, compiled code contains hard-coded memory addresses for its functions and global data. A shared library (`.so`), however, is loaded into a different process's address space at runtime, and that address can vary between programs or even between runs of the same program. If the library's code contained fixed addresses, it would break as soon as it wasn't loaded at the exact address it was compiled for.
 
 `-fPIC` solves this by making the compiler generate code that accesses functions and data through offsets and indirect tables (the GOT and PLT) instead of absolute addresses. This is why the Makefile compiles a separate set of `_pic.o` object files only for the `.so` build — the static library doesn't need this indirection since its code is copied directly into the final executable at a fixed, known location.
 
