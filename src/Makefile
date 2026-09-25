@@ -47,4 +47,27 @@ $(OBJDIR)/%_pic.o: %.c
 clean:
 	rm -f $(OBJDIR)/*.o $(STATIC_LIB) $(DYNAMIC_LIB) $(TARGET_STATIC) $(TARGET_DYNAMIC)
 
-.PHONY: all clean
+PREFIX = /usr/local
+BINDIR_INSTALL = $(PREFIX)/bin
+MANDIR_INSTALL = $(PREFIX)/share/man/man1
+
+install: $(TARGET_DYNAMIC)
+	install -d $(BINDIR_INSTALL)
+	install -m 755 $(TARGET_DYNAMIC) $(BINDIR_INSTALL)/client
+	install -d $(MANDIR_INSTALL)
+	install -m 644 ../man/man3/*.1 $(MANDIR_INSTALL)
+	install -d /etc/ld.so.conf.d
+	echo "$(shell pwd)/../lib" > /etc/ld.so.conf.d/libmyutils.conf
+	ldconfig
+
+uninstall:
+	rm -f $(BINDIR_INSTALL)/client
+	rm -f $(MANDIR_INSTALL)/mystrlen.1 $(MANDIR_INSTALL)/mystrcpy.1 \
+	      $(MANDIR_INSTALL)/mystrncpy.1 $(MANDIR_INSTALL)/mystrcat.1 \
+	      $(MANDIR_INSTALL)/wordCount.1 $(MANDIR_INSTALL)/mygrep.1 \
+	      $(MANDIR_INSTALL)/client.1
+	rm -f /etc/ld.so.conf.d/libmyutils.conf
+	ldconfig
+
+
+.PHONY: all clean install uninstall

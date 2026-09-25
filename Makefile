@@ -4,4 +4,10 @@ all:
 clean:
 	$(MAKE) -C src clean
 
-.PHONY: all clean
+install:
+	$(MAKE) -C src install
+
+uninstall:
+	$(MAKE) -C src uninstall
+
+.PHONY: all clean install uninstall

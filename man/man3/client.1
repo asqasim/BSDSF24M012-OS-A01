@@ -1,0 +1,29 @@
+.TH CLIENT 1 "September 2026" "libmyutils 1.0" "User Commands"
+.SH NAME
+client \- driver program demonstrating the libmyutils library
+.SH SYNOPSIS
+.B client
+.SH DESCRIPTION
+.B client
+is a demonstration program that exercises every function provided by
+the
+.B libmyutils
+library, including string manipulation functions
+.RB ( mystrlen ", " mystrcpy ", " mystrncpy ", " mystrcat )
+and file utility functions
+.RB ( wordCount ", " mygrep ).
+It is built as part of the libmyutils project for Operating Systems
+coursework, and can be linked against either the static
+.RI ( libmyutils.a )
+or dynamic
+.RI ( libmyutils.so )
+version of the library.
+.SH SEE ALSO
+.BR mystrlen (1),
+.BR mystrcpy (1),
+.BR mystrncpy (1),
+.BR mystrcat (1),
+.BR wordCount (1),
+.BR mygrep (1)
+.SH AUTHOR
+Ahmad Sohaib Qasim <qasim.datadev@gmail.com>

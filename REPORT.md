@@ -84,3 +84,26 @@ $ ldd bin/client_dynamic
 After exporting `LD_LIBRARY_PATH=$(pwd)/lib:$LD_LIBRARY_PATH`, the loader could find and resolve it, and `ldd` showed the library correctly linked to the path inside my project's `lib/` directory.
 
 This demonstrates that with dynamic linking, resolving dependencies is **not** the compiler or linker's job at build time — it's deferred entirely to the OS's dynamic loader, which runs every time the program starts. The loader is responsible for locating, loading, and binding every shared library a program depends on at launch, which is why a dynamically linked program is not truly "complete" on its own — it depends on its runtime environment being configured correctly, unlike a static binary which is fully self-contained.
+
+---
+
+## Feature-5: Report Questions
+
+**Q: What is the purpose of a man page, and what do the standard sections (.TH, .SH NAME, .SH SYNOPSIS, .SH DESCRIPTION) represent?**
+
+A man page is Linux's standard, built-in documentation format for commands, library functions, and system calls, viewable directly from the terminal via the `man` command without needing internet access. It's written in `groff`, a markup language that `man` renders into formatted terminal output.
+
+- `.TH` (Title Header) declares the page's title, the man section number, the release date, and the source/version — this is metadata `man` uses to catalog and locate the page.
+- `.SH NAME` gives the command/function name and a one-line summary, which is also what `apropos`/`man -k` searches against.
+- `.SH SYNOPSIS` shows the exact calling syntax — for a function, its signature and required header; for a command, its usage pattern and flags.
+- `.SH DESCRIPTION` is the detailed explanation of behavior, parameters, and edge cases.
+
+**Q: Why did you install the man pages into man1 instead of man3, even though the assignment's directory structure used man/man3?**
+
+Man sections group documentation by category: section 1 is for user-executable commands, while section 3 is for C library functions referenced via `#include`. Although the project's `man/man3/` directory (as specified in the assignment) holds pages for both `client` (a command) and individual library functions like `mystrlen`, when installing system-wide I placed all of them into `/usr/local/share/man/man1` because in this project they are all invoked/documented as command-line-accessible references rather than being installed as a linkable public API with its own dedicated section-3 documentation set. This is a simplification made for this assignment; a fully rigorous package would split function-level docs into section 3 and only the `client` command into section 1.
+
+**Q: What does the `install` target in your Makefile do, and why is registering the library path with ldconfig necessary?**
+
+The `install` target copies the compiled `client` executable into `/usr/local/bin` (a directory already on the system `PATH`) and the man pages into the system man directory, so both become accessible from anywhere without needing to `cd` into the project folder.
+
+Registering `lib/` in `/etc/ld.so.conf.d/` and running `ldconfig` adds the project's library directory to the dynamic loader's system-wide cache of trusted library search paths. Without this step, running the installed `client` binary from outside the project directory would still fail with "cannot open shared object file," since `LD_LIBRARY_PATH` is a per-shell-session variable and wouldn't apply globally. `ldconfig` makes the shared library discoverable system-wide, permanently, regardless of which shell or user runs the program.
